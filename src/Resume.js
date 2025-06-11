@@ -4,7 +4,9 @@ import React, { useState, useEffect, useCallback, createContext,useContext } fro
 import { Mail, Phone, Linkedin, Github, Globe, Code, FileText, Plus, Trash2, Download, Loader, AlertTriangle, ChevronDown, RefreshCw, Briefcase, Wrench, Award, Moon, Sun, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import LandingPage from './LandingPage'; // Import the new LandingPage component
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';// --- Dark Mode Context ---
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// --- Dark Mode Context ---
 const DarkModeContext = createContext();
 
 export const useDarkMode = () => {
@@ -73,7 +75,6 @@ export const DarkModeToggle = () => {
     </button>
   );
 };
-
 
 // --- LaTeX Generation Module with Dynamic Ordering ---
 
@@ -334,19 +335,21 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
     };
 
     return (
-        <div className="surface rounded-lg mb-6 overflow-hidden transition-all duration-300">
+        <div className="surface rounded-lg mb-4 lg:mb-6 overflow-hidden transition-all duration-300">
             <button
                 onClick={toggleSection}
-                className="w-full flex justify-between items-center p-4 text-left font-semibold text-lg hover:surface-secondary transition-colors duration-200"
+                className="w-full flex justify-between items-center p-3 lg:p-4 text-left font-semibold text-base lg:text-lg hover:surface-secondary transition-colors duration-200"
                 style={{ color: 'var(--color-foreground)' }}
             >
-                <div className="flex items-center gap-3">
-                    {icon}
-                    <span>{title}</span>
+                <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="flex-shrink-0">
+                        {React.cloneElement(icon, { size: window.innerWidth < 1024 ? 20 : 24 })}
+                    </div>
+                    <span className="truncate">{title}</span>
                 </div>
                 <ChevronDown
-                    size={24}
-                    className={`transform transition-transform duration-300 ${
+                    size={window.innerWidth < 1024 ? 20 : 24}
+                    className={`transform transition-transform duration-300 flex-shrink-0 ${
                         isOpen ? 'rotate-180' : ''
                     }`}
                 />
@@ -358,7 +361,7 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
                         : 'max-h-0 opacity-0 invisible overflow-hidden'
                 }`}
             >
-                <div className="p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     {children}
                 </div>
             </div>
@@ -388,38 +391,38 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
 
     if (!isOpen) {
         return (
-            <div className="surface rounded-lg shadow-md mb-6 p-4">
+            <div className="surface rounded-lg shadow-md mb-4 lg:mb-6 p-3 lg:p-4">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="w-full flex justify-between items-center text-left font-semibold text-lg"
+                    className="w-full flex justify-between items-center text-left font-semibold text-base lg:text-lg"
                     style={{ color: 'var(--color-foreground)' }}
                 >
-                    <div className="flex items-center gap-3">
-                        <GripVertical size={24} />
-                        <span>Customize Section Order</span>
+                    <div className="flex items-center gap-2 lg:gap-3">
+                        <GripVertical size={window.innerWidth < 1024 ? 20 : 24} />
+                        <span className="truncate">Customize Section Order</span>
                     </div>
-                    <ChevronDown size={24} />
+                    <ChevronDown size={window.innerWidth < 1024 ? 20 : 24} className="flex-shrink-0" />
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="surface rounded-lg shadow-md mb-6">
+        <div className="surface rounded-lg shadow-md mb-4 lg:mb-6">
             <button
                 onClick={() => setIsOpen(false)}
-                className="w-full flex justify-between items-center p-4 text-left font-semibold text-lg"
+                className="w-full flex justify-between items-center p-3 lg:p-4 text-left font-semibold text-base lg:text-lg"
                 style={{ color: 'var(--color-foreground)' }}
             >
-                <div className="flex items-center gap-3">
-                    <GripVertical size={24} />
-                    <span>Customize Section Order</span>
+                <div className="flex items-center gap-2 lg:gap-3">
+                    <GripVertical size={window.innerWidth < 1024 ? 20 : 24} />
+                    <span className="truncate">Customize Section Order</span>
                 </div>
-                <ChevronDown size={24} className="transform rotate-180" />
+                <ChevronDown size={window.innerWidth < 1024 ? 20 : 24} className="transform rotate-180 flex-shrink-0" />
             </button>
             
-            <div className="p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
-                <p className="text-sm mb-4" style={{ color: 'var(--color-foreground-secondary)' }}>
+            <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                <p className="text-xs lg:text-sm mb-3 lg:mb-4" style={{ color: 'var(--color-foreground-secondary)' }}>
                     Drag and drop to reorder sections. This will change the order in your generated resume.
                 </p>
                 
@@ -434,7 +437,7 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`flex items-center gap-3 p-3 surface-secondary rounded-lg border cursor-move hover:surface transition-colors ${
+                                                className={`flex items-center gap-2 lg:gap-3 p-2 lg:p-3 surface-secondary rounded-lg border cursor-move hover:surface transition-colors ${
                                                     snapshot.isDragging ? 'opacity-60 transform rotate-2 shadow-lg z-1000' : ''
                                                 }`}
                                                 style={{
@@ -442,15 +445,15 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
                                                     ...provided.draggableProps.style
                                                 }}
                                             >
-                                                <GripVertical size={16} style={{ color: 'var(--color-foreground-secondary)' }} />
-                                                <div className="flex items-center gap-2 flex-1">
+                                                <GripVertical size={14} style={{ color: 'var(--color-foreground-secondary)' }} className="flex-shrink-0" />
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
                                                     {sectionNames[sectionId]?.icon}
-                                                    <span className="font-medium" style={{ color: 'var(--color-foreground)' }}>
+                                                    <span className="font-medium text-sm lg:text-base truncate" style={{ color: 'var(--color-foreground)' }}>
                                                         {sectionNames[sectionId]?.name}
                                                     </span>
                                                 </div>
-                                                <div className="text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
-                                                    Position {index + 1}
+                                                <div className="text-xs lg:text-sm flex-shrink-0" style={{ color: 'var(--color-foreground-secondary)' }}>
+                                                    {index + 1}
                                                 </div>
                                             </div>
                                         )}
@@ -462,8 +465,8 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
                     </Droppable>
                 </DragDropContext>
                 
-                <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-                    <p className="text-sm" style={{ color: 'var(--color-primary)' }}>
+                <div className="mt-3 lg:mt-4 p-2 lg:p-3 rounded-lg" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <p className="text-xs lg:text-sm" style={{ color: 'var(--color-primary)' }}>
                         💡 <strong>Tip:</strong> The sections will appear in your resume in the exact order shown above.
                     </p>
                 </div>
@@ -471,8 +474,6 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
         </div>
     );
 };
-
-
 
 // The core component for the Resume Generator with all enhancements
 const ResumeGenerator = () => {
@@ -503,8 +504,7 @@ const ResumeGenerator = () => {
   const [compilationError, setCompilationError] = useState('');
   
   // Enhanced compilation function with dynamic section ordering
-  // Enhanced compilation function with proper auto-compilation state handling
-const handleCompile = useCallback(async (isManual = false) => {
+  const handleCompile = useCallback(async (isManual = false) => {
     // Set compiling state for both manual and auto compilation
     setIsCompiling(true);
     setCompilationError('');
@@ -552,8 +552,6 @@ const handleCompile = useCallback(async (isManual = false) => {
     }
 }, [resumeData, sectionOrder, pdfUrl]);
 
-  
-
   // Enhanced useEffect to include sectionOrder dependency
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -566,7 +564,7 @@ const handleCompile = useCallback(async (isManual = false) => {
             URL.revokeObjectURL(pdfUrl);
         }
     };
-}, [resumeData, sectionOrder]); 
+}, [resumeData, sectionOrder]);
 
   // --- Data Update Functions (preserved exactly as original) ---
   const updatePersonalInfo = (field, value) => setResumeData(p => ({ ...p, personalInfo: { ...p.personalInfo, [field]: value } }));
@@ -596,48 +594,48 @@ const handleCompile = useCallback(async (isManual = false) => {
       case 'education':
         return (
           <CollapsibleSection key="education" title="Education" icon={<Code size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-4">
-              <button onClick={addEducation} className="btn-primary flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium">
-                <Plus size={16} /> Add Education
+            <div className="flex justify-end mb-3 lg:mb-4">
+              <button onClick={addEducation} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+                <Plus size={14} /> Add Education
               </button>
             </div>
             {resumeData.education.map((edu, index) => (
-              <div key={index} className="border-t pt-4 mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
                 {resumeData.education.length > 1 && (
                   <div className="flex justify-end mb-2">
                     <button onClick={() => removeEducation(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Education">
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
                   <input 
                     type="text" 
                     placeholder="Institution Name" 
                     value={edu.institution} 
                     onChange={(e) => updateEducation(index, 'institution', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none"
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none"
                   />
                   <input 
                     type="text" 
                     placeholder="Duration (e.g., Sep 2020 - Present)" 
                     value={edu.duration} 
                     onChange={(e) => updateEducation(index, 'duration', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none"
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none"
                   />
                   <input 
                     type="text" 
                     placeholder="Degree & Specialization" 
                     value={edu.degree} 
                     onChange={(e) => updateEducation(index, 'degree', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none"
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none"
                   />
                   <input 
                     type="text" 
                     placeholder="CGPA/GPA" 
                     value={edu.cgpa} 
                     onChange={(e) => updateEducation(index, 'cgpa', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none"
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none"
                   />
                 </div>
                 <textarea 
@@ -645,7 +643,7 @@ const handleCompile = useCallback(async (isManual = false) => {
                   value={edu.coursework} 
                   onChange={(e) => updateEducation(index, 'coursework', e.target.value)} 
                   rows={2} 
-                  className="input-field w-full p-3 rounded-lg mt-4 focus:outline-none resize-none"
+                  className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg mt-3 lg:mt-4 focus:outline-none resize-none"
                 />
               </div>
             ))}
@@ -655,52 +653,52 @@ const handleCompile = useCallback(async (isManual = false) => {
       case 'experience':
         return (
           <CollapsibleSection key="experience" title="Experience" icon={<Briefcase size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-4">
-              <button onClick={addExperience} className="btn-primary flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium">
-                <Plus size={16} /> Add Experience
+            <div className="flex justify-end mb-3 lg:mb-4">
+              <button onClick={addExperience} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+                <Plus size={14} /> Add Experience
               </button>
             </div>
             {resumeData.experience.map((exp, index) => (
-              <div key={index} className="border-t pt-4 mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
                 {resumeData.experience.length > 1 && (
                   <div className="flex justify-end mb-2">
                     <button onClick={() => removeExperience(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Experience">
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
                   <input 
                     type="text" 
                     placeholder="Company Name" 
                     value={exp.company} 
                     onChange={e => updateExperience(index, 'company', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                   <input 
                     type="text" 
                     placeholder="Duration (e.g., May 2025 – June 2025)" 
                     value={exp.duration} 
                     onChange={e => updateExperience(index, 'duration', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                   <input 
                     type="text" 
                     placeholder="Position/Role" 
                     value={exp.position} 
                     onChange={e => updateExperience(index, 'position', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                   <input 
                     type="text" 
                     placeholder="Location (e.g., New Delhi)" 
                     value={exp.location} 
                     onChange={e => updateExperience(index, 'location', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                 </div>
-                <div className="space-y-3">
-                  <label className="font-medium text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
+                <div className="space-y-2 lg:space-y-3">
+                  <label className="font-medium text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
                     Achievements/Responsibilities:
                   </label>
                   {exp.achievements.map((ach, achIndex) => (
@@ -710,7 +708,7 @@ const handleCompile = useCallback(async (isManual = false) => {
                         value={ach} 
                         onChange={e => updateExperienceAchievement(index, achIndex, e.target.value)} 
                         rows={2} 
-                        className="input-field flex-1 p-3 rounded-lg focus:outline-none resize-none" 
+                        className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
                       />
                       {exp.achievements.length > 1 && (
                         <button 
@@ -718,14 +716,14 @@ const handleCompile = useCallback(async (isManual = false) => {
                           className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
                           title="Remove Achievement"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
                   ))}
                   <button 
                     onClick={() => addExperienceAchievement(index)} 
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="text-blue-600 hover:text-blue-800 text-xs lg:text-sm font-medium"
                   >
                     + Add Achievement
                   </button>
@@ -738,52 +736,52 @@ const handleCompile = useCallback(async (isManual = false) => {
       case 'projects':
         return (
           <CollapsibleSection key="projects" title="Projects" icon={<Globe size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-4">
-              <button onClick={addProject} className="btn-primary flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium">
-                <Plus size={16} /> Add Project
+            <div className="flex justify-end mb-3 lg:mb-4">
+              <button onClick={addProject} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+                <Plus size={14} /> Add Project
               </button>
             </div>
             {resumeData.projects.map((proj, index) => (
-              <div key={index} className="border-t pt-4 mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
                 {resumeData.projects.length > 1 && (
                   <div className="flex justify-end mb-2">
                     <button onClick={() => removeProject(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Project">
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
                   <input 
                     type="text" 
                     placeholder="Project Name" 
                     value={proj.name} 
                     onChange={e => updateProject(index, 'name', e.target.value)} 
-                    className="input-field p-3 rounded-lg md:col-span-2 focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
                   />
                   <input 
                     type="text" 
                     placeholder="Technologies Used" 
                     value={proj.technologies} 
                     onChange={e => updateProject(index, 'technologies', e.target.value)} 
-                    className="input-field p-3 rounded-lg md:col-span-2 focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
                   />
                   <input 
                     type="url" 
                     placeholder="GitHub Repository URL" 
                     value={proj.github} 
                     onChange={e => updateProject(index, 'github', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                   <input 
                     type="url" 
                     placeholder="Live Site URL" 
                     value={proj.livesite} 
                     onChange={e => updateProject(index, 'livesite', e.target.value)} 
-                    className="input-field p-3 rounded-lg focus:outline-none" 
+                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
                   />
                 </div>
-                <div className="space-y-3">
-                  <label className="font-medium text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
+                <div className="space-y-2 lg:space-y-3">
+                  <label className="font-medium text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
                     Description:
                   </label>
                   {proj.description.map((desc, descIndex) => (
@@ -793,7 +791,7 @@ const handleCompile = useCallback(async (isManual = false) => {
                         value={desc} 
                         onChange={e => updateProjectDescription(index, descIndex, e.target.value)} 
                         rows={2} 
-                        className="input-field flex-1 p-3 rounded-lg focus:outline-none resize-none" 
+                        className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
                       />
                       {proj.description.length > 1 && (
                         <button 
@@ -801,14 +799,14 @@ const handleCompile = useCallback(async (isManual = false) => {
                           className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
                           title="Remove Description"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
                   ))}
                   <button 
                     onClick={() => addProjectDescription(index)} 
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="text-blue-600 hover:text-blue-800 text-xs lg:text-sm font-medium"
                   >
                     + Add Description Point
                   </button>
@@ -821,41 +819,41 @@ const handleCompile = useCallback(async (isManual = false) => {
       case 'skills':
         return (
           <CollapsibleSection key="skills" title="Skills" icon={<Wrench size={24} />} defaultOpen={true}>
-            <div className="space-y-4">
+            <div className="space-y-3 lg:space-y-4">
               <textarea 
                 placeholder="Expertise" 
                 value={resumeData.skills.expertise} 
                 onChange={(e) => updateSkills('expertise', e.target.value)} 
                 rows={2} 
-                className="input-field w-full p-3 rounded-lg focus:outline-none resize-none" 
+                className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
               />
               <textarea 
                 placeholder="Languages" 
                 value={resumeData.skills.languages} 
                 onChange={(e) => updateSkills('languages', e.target.value)} 
                 rows={2} 
-                className="input-field w-full p-3 rounded-lg focus:outline-none resize-none" 
+                className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
               />
               <textarea 
                 placeholder="Frameworks & Technologies" 
                 value={resumeData.skills.frameworks} 
                 onChange={(e) => updateSkills('frameworks', e.target.value)} 
                 rows={2} 
-                className="input-field w-full p-3 rounded-lg focus:outline-none resize-none" 
+                className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
               />
               <textarea 
                 placeholder="Developer Tools" 
                 value={resumeData.skills.tools} 
                 onChange={(e) => updateSkills('tools', e.target.value)} 
                 rows={2} 
-                className="input-field w-full p-3 rounded-lg focus:outline-none resize-none" 
+                className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
               />
               <textarea 
                 placeholder="Professional Skills" 
                 value={resumeData.skills.professional} 
                 onChange={(e) => updateSkills('professional', e.target.value)} 
                 rows={2} 
-                className="input-field w-full p-3 rounded-lg focus:outline-none resize-none" 
+                className="input-field w-full p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
               />
             </div>
           </CollapsibleSection>
@@ -864,12 +862,12 @@ const handleCompile = useCallback(async (isManual = false) => {
       case 'certifications':
         return (
           <CollapsibleSection key="certifications" title="Certifications & Achievements" icon={<Award size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-4">
-              <button onClick={addCertification} className="btn-primary flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium">
-                <Plus size={16} /> Add Certification
+            <div className="flex justify-end mb-3 lg:mb-4">
+              <button onClick={addCertification} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+                <Plus size={14} /> Add Certification
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 lg:space-y-3">
               {resumeData.certifications.map((cert, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <textarea 
@@ -877,7 +875,7 @@ const handleCompile = useCallback(async (isManual = false) => {
                     value={cert} 
                     onChange={(e) => updateCertification(index, e.target.value)} 
                     rows={2} 
-                    className="input-field flex-1 p-3 rounded-lg focus:outline-none resize-none" 
+                    className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
                   />
                   {resumeData.certifications.length > 1 && (
                     <button 
@@ -885,7 +883,7 @@ const handleCompile = useCallback(async (isManual = false) => {
                       className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
                       title="Remove Certification"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -901,132 +899,144 @@ const handleCompile = useCallback(async (isManual = false) => {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-        {/* Left Column: Enhanced Form with Section Ordering */}
-        <div className="w-full lg:w-1/2 p-6 overflow-y-auto h-screen" style={{ backgroundColor: 'var(--color-surface)' }}>
-            {/* Header with Dark Mode Toggle */}
-            {/* Header with Dark Mode Toggle and Download Button */}
-<div className="flex justify-between items-center mb-8">
-    <h1 className="text-3xl font-bold" style={{ color: 'var(--color-foreground)' }}>
-        LaTeX Resume Generator
-    </h1>
-    <div className="flex items-center gap-3">
-        <DarkModeToggle />
-        {pdfUrl && (
-            <a 
-                href={pdfUrl} 
-                download="resume.pdf" 
-                className="btn-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-            >
-                <Download size={16} /> Download
-            </a>
-        )}
-    </div>
-</div>
-
-
-            {/* Section Order Manager */}
-            <SectionOrderManager 
-                sectionOrder={sectionOrder}
-                setSectionOrder={setSectionOrder}
-                isOpen={sectionOrderOpen}
-                setIsOpen={setSectionOrderOpen}
-            />
-
-            {/* Personal Information Section (always first, not reorderable) */}
-            <CollapsibleSection title="Personal Information" icon={<FileText size={24} />} defaultOpen={true}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input 
-                        type="text" 
-                        placeholder="Full Name" 
-                        value={resumeData.personalInfo.name} 
-                        onChange={(e) => updatePersonalInfo('name', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="email" 
-                        placeholder="Email Address" 
-                        value={resumeData.personalInfo.email} 
-                        onChange={(e) => updatePersonalInfo('email', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="tel" 
-                        placeholder="Phone Number" 
-                        value={resumeData.personalInfo.phone} 
-                        onChange={(e) => updatePersonalInfo('phone', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="url" 
-                        placeholder="LinkedIn Profile URL" 
-                        value={resumeData.personalInfo.linkedin} 
-                        onChange={(e) => updatePersonalInfo('linkedin', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="url" 
-                        placeholder="GitHub Profile URL" 
-                        value={resumeData.personalInfo.github} 
-                        onChange={(e) => updatePersonalInfo('github', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="url" 
-                        placeholder="Portfolio Website URL" 
-                        value={resumeData.personalInfo.portfolio} 
-                        onChange={(e) => updatePersonalInfo('portfolio', e.target.value)} 
-                        className="input-field p-3 rounded-lg focus:outline-none" 
-                    />
-                    <input 
-                        type="url" 
-                        placeholder="LeetCode Profile URL" 
-                        value={resumeData.personalInfo.leetcode} 
-                        onChange={(e) => updatePersonalInfo('leetcode', e.target.value)} 
-                        className="input-field p-3 rounded-lg md:col-span-2 focus:outline-none" 
-                    />
+        {/* Mobile-Optimized Layout: Details Section (Upper 2/3) */}
+        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface)' }}>
+            {/* Form Container - Mobile: 2/3 height, Desktop: Full height */}
+            <div className="h-screen lg:h-screen overflow-y-auto p-3 lg:p-6" 
+                 style={{ 
+                     height: window.innerWidth < 1024 ? '66.67vh' : '100vh',
+                     minHeight: window.innerWidth < 1024 ? '66.67vh' : 'auto'
+                 }}>
+                
+                {/* Compact Header with Dark Mode Toggle and Download */}
+                <div className="flex justify-between items-center mb-4 lg:mb-8">
+                    <h1 className="text-xl lg:text-3xl font-bold truncate pr-2" style={{ color: 'var(--color-foreground)' }}>
+                        LaTeX Resume Generator
+                    </h1>
+                    <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+                        <DarkModeToggle />
+                        {pdfUrl && (
+                            <a 
+                                href={pdfUrl} 
+                                download="resume.pdf" 
+                                className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium"
+                            >
+                                <Download size={14} /> 
+                                <span className="hidden sm:inline">Download</span>
+                            </a>
+                        )}
+                    </div>
                 </div>
-            </CollapsibleSection>
 
-            {/* Render sections in the order specified by sectionOrder */}
-            {sectionOrder.map(sectionType => renderSectionByType(sectionType))}
+                {/* Section Order Manager */}
+                <SectionOrderManager 
+                    sectionOrder={sectionOrder}
+                    setSectionOrder={setSectionOrder}
+                    isOpen={sectionOrderOpen}
+                    setIsOpen={setSectionOrderOpen}
+                />
+
+                {/* Personal Information Section */}
+                <CollapsibleSection title="Personal Information" icon={<FileText size={24} />} defaultOpen={true}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
+                        <input 
+                            type="text" 
+                            placeholder="Full Name" 
+                            value={resumeData.personalInfo.name} 
+                            onChange={(e) => updatePersonalInfo('name', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="email" 
+                            placeholder="Email Address" 
+                            value={resumeData.personalInfo.email} 
+                            onChange={(e) => updatePersonalInfo('email', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="tel" 
+                            placeholder="Phone Number" 
+                            value={resumeData.personalInfo.phone} 
+                            onChange={(e) => updatePersonalInfo('phone', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="url" 
+                            placeholder="LinkedIn Profile URL" 
+                            value={resumeData.personalInfo.linkedin} 
+                            onChange={(e) => updatePersonalInfo('linkedin', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="url" 
+                            placeholder="GitHub Profile URL" 
+                            value={resumeData.personalInfo.github} 
+                            onChange={(e) => updatePersonalInfo('github', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="url" 
+                            placeholder="Portfolio Website URL" 
+                            value={resumeData.personalInfo.portfolio} 
+                            onChange={(e) => updatePersonalInfo('portfolio', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                        />
+                        <input 
+                            type="url" 
+                            placeholder="LeetCode Profile URL" 
+                            value={resumeData.personalInfo.leetcode} 
+                            onChange={(e) => updatePersonalInfo('leetcode', e.target.value)} 
+                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
+                        />
+                    </div>
+                </CollapsibleSection>
+
+                {/* Render sections in the order specified by sectionOrder */}
+                {sectionOrder.map(sectionType => renderSectionByType(sectionType))}
+            </div>
         </div>
 
-        {/* Right Column: Enhanced PDF Preview */}
-        <div className="w-full lg:w-1/2 p-4 flex flex-col h-screen" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
-            {/* Section Order Preview */}
-            {/* <SectionOrderPreview sectionOrder={sectionOrder} /> */}
-            
-         
-            
-            <div className="flex-grow surface rounded-lg flex items-center justify-center p-2 mt-4">
+        {/* Mobile-Optimized Layout: PDF Preview Section (Lower 1/3) */}
+        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
+            <div className="flex-grow surface rounded-lg lg:rounded-none flex items-center justify-center p-2 lg:p-4 m-2 lg:m-4 lg:mt-4"
+                 style={{ 
+                     height: window.innerWidth < 1024 ? '33.33vh' : 'calc(100vh - 2rem)',
+                     minHeight: window.innerWidth < 1024 ? '33.33vh' : 'auto',
+                     maxHeight: window.innerWidth < 1024 ? '33.33vh' : 'none'
+                 }}>
 
                 {isCompiling && (
                     <div className="text-center" style={{ color: 'var(--color-foreground-secondary)' }}>
-                        <Loader size={48} className="animate-spin mb-4 mx-auto" />
-                        <p>Compiling PDF with custom section order...</p>
+                        <Loader size={window.innerWidth < 1024 ? 32 : 48} className="animate-spin mb-2 lg:mb-4 mx-auto" />
+                        <p className="text-xs lg:text-base">Compiling PDF with custom section order...</p>
                     </div>
                 )}
                 {compilationError && !isCompiling && (
-                    <div className="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 m-4 rounded-md w-full h-full overflow-y-auto">
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-800 p-2 lg:p-4 m-2 lg:m-4 rounded-md w-full h-full overflow-y-auto">
                         <div className="flex items-center">
-                            <AlertTriangle size={24} className="mr-3 flex-shrink-0" />
-                            <p className="font-bold">Compilation Failed</p>
+                            <AlertTriangle size={window.innerWidth < 1024 ? 20 : 24} className="mr-2 lg:mr-3 flex-shrink-0" />
+                            <p className="font-bold text-sm lg:text-base">Compilation Failed</p>
                         </div>
-                        <p className="text-sm mt-2 mb-2">Please check your inputs for special characters. The error from the compiler is shown below:</p>
-                        <pre className="text-xs mt-2 p-2 bg-red-50 rounded whitespace-pre-wrap font-mono break-all">
+                        <p className="text-xs lg:text-sm mt-1 lg:mt-2 mb-1 lg:mb-2">Please check your inputs for special characters. The error from the compiler is shown below:</p>
+                        <pre className="text-xs mt-1 lg:mt-2 p-1 lg:p-2 bg-red-50 rounded whitespace-pre-wrap font-mono break-all max-h-32 lg:max-h-none overflow-y-auto">
                             {compilationError}
                         </pre> 
                     </div>
                 )}
                 {!isCompiling && !compilationError && pdfUrl && (
-                    <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
-                        <p>Your browser does not support PDFs. <a href={pdfUrl}>Download PDF</a></p>
+                    <object data={pdfUrl} type="application/pdf" width="100%" height="100%" className="rounded-lg">
+                        <div className="text-center p-4">
+                            <p className="text-sm lg:text-base mb-2" style={{ color: 'var(--color-foreground-secondary)' }}>Your browser does not support PDFs.</p>
+                            <a href={pdfUrl} className="btn-primary inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium">
+                                <Download size={16} /> Download PDF
+                            </a>
+                        </div>
                     </object>
                 )}
                 {!isCompiling && !compilationError && !pdfUrl && (
                     <div className="text-center" style={{ color: 'var(--color-foreground-secondary)' }}>
-                        <p>Your resume preview will appear here.</p>
-                        <p className="text-sm">Start typing to see it live!</p>
+                        <p className="text-sm lg:text-base">Your resume preview will appear here.</p>
+                        <p className="text-xs lg:text-sm">Start typing to see it live!</p>
                     </div>
                 )}
             </div>
