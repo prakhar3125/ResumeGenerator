@@ -1,8 +1,20 @@
+//LandingPage.js
 import React from 'react';
 import { FileText, Zap, Download, Star, ArrowRight, Check, Globe, Users, Award } from 'lucide-react';
-import { DarkModeToggle, useDarkMode } from './your-existing-components'; // Import from your existing code
+// import { DarkModeToggle, useDarkMode } from './your-existing-components'; // Import from your existing code
+import { useNavigate } from 'react-router-dom';
+// const DarkModeContext = createContext();
+import { DarkModeProvider, DarkModeToggle } from './Resume'; // Import DarkModeProvider from Resume.js
+
+
+
+
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const handleGetStarted = () => {
+    navigate('/builder');
+  };
   const features = [
     {
       icon: <Zap size={24} />,
@@ -35,10 +47,7 @@ const LandingPage = () => {
     "No watermarks"
   ];
 
-  const handleGetStarted = () => {
-    // Navigate to the resume builder
-    window.location.href = '/builder';
-  };
+
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
@@ -77,50 +86,99 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: 'var(--color-foreground)' }}>
-              Create Professional Resumes with
-              <span className="block mt-2" style={{ color: 'var(--color-primary)' }}>
-                LaTeX Precision
-              </span>
-            </h1>
-            <p className="text-xl mb-8 leading-relaxed" style={{ color: 'var(--color-foreground-secondary)' }}>
-              Generate stunning, ATS-friendly resumes in seconds. Our LaTeX-powered engine ensures 
-              perfect formatting every time, giving you the edge in today's competitive job market.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <button 
-                onClick={handleGetStarted}
-                className="btn-primary flex items-center gap-3 px-8 py-4 rounded-lg text-lg font-semibold"
-              >
-                Start Building Now
-                <ArrowRight size={20} />
-              </button>
-              <button className="surface hover:surface-secondary border border-border flex items-center gap-3 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
-                <FileText size={20} />
-                View Sample
-              </button>
-            </div>
-            <div className="flex items-center justify-center gap-6 text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
-              <div className="flex items-center gap-2">
-                <Check size={16} style={{ color: 'var(--color-primary)' }} />
-                <span>Free to use</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={16} style={{ color: 'var(--color-primary)' }} />
-                <span>No signup required</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={16} style={{ color: 'var(--color-primary)' }} />
-                <span>Instant download</span>
-              </div>
-            </div>
-          </div>
+{/* Hero Section */}
+<section className="py-20">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: 'var(--color-foreground)' }}>
+        Create Professional Resumes with
+        <span className="block mt-2" style={{ color: 'var(--color-primary)' }}>
+          LaTeX Precision
+        </span>
+      </h1>
+      <p className="text-xl mb-8 leading-relaxed" style={{ color: 'var(--color-foreground-secondary)' }}>
+        Generate stunning, ATS-friendly resumes in seconds. Our LaTeX-powered engine ensures
+        perfect formatting every time, giving you the edge in today's competitive job market.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+        <button
+          onClick={handleGetStarted}
+          className="btn-primary flex items-center gap-3 px-8 py-4 rounded-lg text-lg font-semibold"
+        >
+          Start Building Now
+          {/* Assuming you have an ArrowRight icon component */}
+          {/* <ArrowRight size={20} /> */}
+        </button>
+        <a
+          href="https://drive.google.com/file/d/1ERzlMRsTVwUMo-eImW4tEuUKreWV1y7i/view?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <button className="surface hover:surface-secondary border border-border flex items-center gap-3 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+            {/* Assuming you have a FileText icon component */}
+            {/* <FileText size={20} /> */}
+            View Sample
+          </button>
+        </a>
+      </div>
+      <div className="flex items-center justify-center gap-6 text-sm mb-12" style={{ color: 'var(--color-foreground-secondary)' }}>
+        <div className="flex items-center gap-2">
+          {/* Assuming you have a Check icon component */}
+          {/* <Check size={16} style={{ color: 'var(--color-primary)' }} /> */}
+          <span>Free to use</span>
         </div>
-      </section>
+        <div className="flex items-center gap-2">
+          {/* <Check size={16} style={{ color: 'var(--color-primary)' }} /> */}
+          <span>No signup required</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* <Check size={16} style={{ color: 'var(--color-primary)' }} /> */}
+          <span>Instant download</span>
+        </div>
+      </div>
+
+      {/* MODIFIED: Added Project By Section (Larger) */}
+      <div className="text-center mt-4">
+        {/* Increased text size from sm to lg and bottom margin from 2 to 4 */}
+        <p className="text-lg mb-4" style={{ color: 'var(--color-foreground-secondary)' }}>
+          A Project By{' '}
+          <a
+            href="https://www.linkedin.com/in/prakhar3125/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            Prakhar Sinha
+          </a>
+        </p>
+        <div className="flex justify-center items-center gap-6"> {/* Increased gap for larger icons */}
+          <a
+            href="https://www.linkedin.com/in/prakhar3125/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn Profile"
+            className="hover:opacity-75 transition-opacity"
+          >
+            {/* MODIFIED: Increased icon size from 24x24 to 32x32 */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          </a>
+          <a
+            href="https://github.com/prakhar3125/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub Profile"
+            className="hover:opacity-75 transition-opacity"
+          >
+            {/* MODIFIED: Increased icon size from 24x24 to 32x32 */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 
       {/* Features Section */}
       <section id="features" className="py-20" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
@@ -228,10 +286,10 @@ const LandingPage = () => {
                 "ResumeForge helped me land my dream job! The LaTeX formatting made my resume look incredibly professional."
               </blockquote>
               <div className="font-semibold" style={{ color: 'var(--color-foreground)' }}>
-                Sarah Johnson
+                Divyam
               </div>
               <div className="text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
-                Software Engineer at TechCorp
+                VIT Vellore
               </div>
             </div>
           </div>
