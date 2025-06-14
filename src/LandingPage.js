@@ -69,9 +69,9 @@ const LandingPage = () => {
                 <a href="#how-it-works" className="hover:text-opacity-80 transition-colors" style={{ color: 'var(--color-foreground-secondary)' }}>
                   How it Works
                 </a>
-                <a href="#pricing" className="hover:text-opacity-80 transition-colors" style={{ color: 'var(--color-foreground-secondary)' }}>
+                {/* <a href="#pricing" className="hover:text-opacity-80 transition-colors" style={{ color: 'var(--color-foreground-secondary)' }}>
                   Pricing
-                </a>
+                </a> */}
               </nav>
               <DarkModeToggle />
               <button 
