@@ -1,6 +1,6 @@
 /* Resume.js */
 
-import React, { useState, useEffect, useCallback, createContext,useContext } from 'react';
+import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
 import { Mail, Phone, Linkedin, Github, Globe, Code, FileText, Plus, Trash2, Download, Loader, AlertTriangle, ChevronDown, RefreshCw, Briefcase, Wrench, Award, Moon, Sun, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import LandingPage from './LandingPage'; // Import the new LandingPage component
@@ -188,7 +188,7 @@ const generateCertificationsSection = (certifications) => {
     if (validCerts.length === 0) return '';
     
     const certEntries = validCerts.map(cert => `\\resumeItem{${escapeLatex(cert)}}`).join('\\vspace{4pt}\n');
-
+    
     return `\\vspace{-12pt}
     \\section{Certifications \\& Achievements}
     \\begin{itemize}[leftmargin=0.15in, label={}]
@@ -326,20 +326,41 @@ const useDebounce = (callback, delay) => {
     };
 };
 
-// Enhanced Collapsible Section Component with Dark Mode Support
+// Enhanced Collapsible Section Component with Dark Mode Support and Animation Fix
 const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [animationKey, setAnimationKey] = useState(0);
+    const contentRef = useRef(null);
     
     const toggleSection = () => {
+        if (isAnimating) return;
+        
+        setIsAnimating(true);
         setIsOpen(prev => !prev);
+        
+        // Reset animation state after transition completes
+        setTimeout(() => {
+            setIsAnimating(false);
+            setAnimationKey(prev => prev + 1);
+        }, 300);
+    };
+
+    // Force re-render mechanism for stuck animations
+    const forceRerender = () => {
+        setAnimationKey(prev => prev + 1);
     };
 
     return (
-        <div className="surface rounded-lg mb-4 lg:mb-6 overflow-hidden transition-all duration-300">
+        <div key={animationKey} className="surface rounded-lg mb-4 lg:mb-6 overflow-hidden transition-all duration-300">
             <button
                 onClick={toggleSection}
+                disabled={isAnimating}
                 className="w-full flex justify-between items-center p-3 lg:p-4 text-left font-semibold text-base lg:text-lg hover:surface-secondary transition-colors duration-200"
-                style={{ color: 'var(--color-foreground)' }}
+                style={{ 
+                    color: 'var(--color-foreground)',
+                    opacity: isAnimating ? 0.7 : 1
+                }}
             >
                 <div className="flex items-center gap-2 lg:gap-3">
                     <div className="flex-shrink-0">
@@ -355,12 +376,17 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
                 />
             </button>
             <div
-  className={`transition-[max-height,opacity] duration-300 ease-in-out ${ // This is the fix
-    isOpen 
-      ? 'max-h-screen opacity-100 visible' 
-      : 'max-h-0 opacity-0 invisible overflow-hidden'
-  }`}
->
+                ref={contentRef}
+                className={`transition-all duration-300 ease-in-out ${
+                    isOpen 
+                        ? 'max-h-[2000px] opacity-100 visible' 
+                        : 'max-h-0 opacity-0 invisible overflow-hidden'
+                }`}
+                style={{
+                    transitionProperty: 'max-height, opacity, visibility',
+                    willChange: 'max-height, opacity'
+                }}
+            >
                 <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     {children}
                 </div>
@@ -475,7 +501,7 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
     );
 };
 
-// The core component for the Resume Generator with all enhancements
+// The core component for the Resume Generator with all enhancements and fixes
 const ResumeGenerator = () => {
   // State for the form data (preserved exactly as original)
   const [resumeData, setResumeData] = useState({
@@ -502,6 +528,13 @@ const ResumeGenerator = () => {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilationError, setCompilationError] = useState('');
+  
+  // Add render keys for forced re-rendering
+  const [projectsRenderKey, setProjectsRenderKey] = useState(0);
+  const [globalRenderKey, setGlobalRenderKey] = useState(0);
+  
+  // Refs for scroll functionality
+  const projectsSectionRef = useRef(null);
   
   // Enhanced compilation function with dynamic section ordering
   const handleCompile = useCallback(async (isManual = false) => {
@@ -566,27 +599,107 @@ const ResumeGenerator = () => {
     };
 }, [resumeData, sectionOrder]);
 
-  // --- Data Update Functions (preserved exactly as original) ---
+  // --- Enhanced Data Update Functions with Scroll and Re-render Fixes ---
   const updatePersonalInfo = (field, value) => setResumeData(p => ({ ...p, personalInfo: { ...p.personalInfo, [field]: value } }));
+  
   const addEducation = () => setResumeData(p => ({ ...p, education: [...p.education, { institution: '', duration: '', degree: '', cgpa: '', coursework: '' }] }));
   const removeEducation = index => setResumeData(p => ({ ...p, education: p.education.filter((_, i) => i !== index) }));
   const updateEducation = (index, field, value) => setResumeData(p => ({...p, education: p.education.map((e, i) => i === index ? { ...e, [field]: value } : e)}));
+  
   const addExperience = () => setResumeData(p => ({ ...p, experience: [...p.experience, { company: '', duration: '', position: '', location: '', achievements: [''] }] }));
   const removeExperience = index => setResumeData(p => ({ ...p, experience: p.experience.filter((_, i) => i !== index) }));
   const updateExperience = (index, field, value) => setResumeData(p => ({ ...p, experience: p.experience.map((e, i) => i === index ? { ...e, [field]: value } : e)}));
   const addExperienceAchievement = expIndex => setResumeData(p => ({ ...p, experience: p.experience.map((e, i) => i === expIndex ? { ...e, achievements: [...e.achievements, ''] } : e) }));
   const removeExperienceAchievement = (expIndex, achIndex) => setResumeData(p => ({ ...p, experience: p.experience.map((e, i) => i === expIndex ? { ...e, achievements: e.achievements.filter((_, j) => j !== achIndex) } : e) }));
   const updateExperienceAchievement = (expIndex, achIndex, value) => setResumeData(p => ({...p, experience: p.experience.map((e, i) => i === expIndex ? { ...e, achievements: e.achievements.map((a, j) => j === achIndex ? value : a) } : e)}));
-  const addProject = () => setResumeData(p => ({ ...p, projects: [...p.projects, { name: '', technologies: '', github: '', livesite: '', description: [''] }] }));
-  const removeProject = index => setResumeData(p => ({ ...p, projects: p.projects.filter((_, i) => i !== index) }));
+  
+  // Enhanced project functions with scroll and re-render fixes
+  const addProject = () => {
+    setResumeData(p => ({ 
+        ...p, 
+        projects: [...p.projects, { 
+            name: '', 
+            technologies: '', 
+            github: '', 
+            livesite: '', 
+            description: [''] 
+        }] 
+    }));
+    
+    // Force projects section re-render
+    setProjectsRenderKey(prev => prev + 1);
+    
+    // Scroll to new project after state update
+    setTimeout(() => {
+        if (projectsSectionRef.current) {
+            const projectItems = projectsSectionRef.current.querySelectorAll('[data-project-index]');
+            const lastProject = projectItems[projectItems.length - 1];
+            if (lastProject) {
+                lastProject.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        }
+    }, 150);
+  };
+  
+  const removeProject = index => {
+    setResumeData(p => ({ ...p, projects: p.projects.filter((_, i) => i !== index) }));
+    setProjectsRenderKey(prev => prev + 1);
+  };
+  
   const updateProject = (index, field, value) => setResumeData(p => ({...p, projects: p.projects.map((proj, i) => i === index ? { ...proj, [field]: value } : proj)}));
-  const addProjectDescription = projIndex => setResumeData(p => ({ ...p, projects: p.projects.map((proj, i) => i === projIndex ? { ...proj, description: [...proj.description, ''] } : proj)}));
-  const removeProjectDescription = (projIndex, descIndex) => setResumeData(p => ({ ...p, projects: p.projects.map((proj, i) => i === projIndex ? { ...proj, description: proj.description.filter((_, j) => j !== descIndex) } : proj)}));
-  const updateProjectDescription = (projIndex, descIndex, value) => setResumeData(p => ({ ...p, projects: p.projects.map((proj, i) => i === projIndex ? { ...proj, description: proj.description.map((d, j) => j === descIndex ? value : d)} : proj)}));
+  
+  const addProjectDescription = projIndex => {
+    setResumeData(p => ({ 
+        ...p, 
+        projects: p.projects.map((proj, i) => 
+            i === projIndex 
+                ? { ...proj, description: [...proj.description, ''] }
+                : proj
+        )
+    }));
+  };
+  
+  const removeProjectDescription = (projIndex, descIndex) => {
+    setResumeData(p => ({ 
+        ...p, 
+        projects: p.projects.map((proj, i) => 
+            i === projIndex 
+                ? { ...proj, description: proj.description.filter((_, j) => j !== descIndex) }
+                : proj
+        )
+    }));
+  };
+  
+  const updateProjectDescription = (projIndex, descIndex, value) => {
+    setResumeData(p => ({ 
+        ...p, 
+        projects: p.projects.map((proj, i) => 
+            i === projIndex 
+                ? { 
+                    ...proj, 
+                    description: proj.description.map((d, j) => 
+                        j === descIndex ? value : d
+                    ) 
+                }
+                : proj
+        )
+    }));
+  };
+  
   const updateSkills = (field, value) => setResumeData(p => ({...p, skills: { ...p.skills, [field]: value } }));
   const addCertification = () => setResumeData(p => ({ ...p, certifications: [...p.certifications, ''] }));
   const removeCertification = index => setResumeData(p => ({ ...p, certifications: p.certifications.filter((_, i) => i !== index) }));
   const updateCertification = (index, value) => setResumeData(p => ({...p, certifications: p.certifications.map((c, i) => i === index ? value : c)}));
+  
+  // Force re-render function for stuck sections
+  const forceGlobalRerender = () => {
+    setGlobalRenderKey(prev => prev + 1);
+    setProjectsRenderKey(prev => prev + 1);
+  };
   
   // Generate sections dynamically based on section order
   const renderSectionByType = (sectionType) => {
@@ -600,7 +713,7 @@ const ResumeGenerator = () => {
               </button>
             </div>
             {resumeData.education.map((edu, index) => (
-              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+              <div key={`education-${index}-${edu.institution || 'empty'}`} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
                 {resumeData.education.length > 1 && (
                   <div className="flex justify-end mb-2">
                     <button onClick={() => removeEducation(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Education">
@@ -659,7 +772,7 @@ const ResumeGenerator = () => {
               </button>
             </div>
             {resumeData.experience.map((exp, index) => (
-              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+              <div key={`experience-${index}-${exp.company || 'empty'}`} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
                 {resumeData.experience.length > 1 && (
                   <div className="flex justify-end mb-2">
                     <button onClick={() => removeExperience(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Experience">
@@ -702,7 +815,7 @@ const ResumeGenerator = () => {
                     Achievements/Responsibilities:
                   </label>
                   {exp.achievements.map((ach, achIndex) => (
-                    <div key={achIndex} className="flex items-start gap-2">
+                    <div key={`achievement-${achIndex}`} className="flex items-start gap-2">
                       <textarea 
                         placeholder="Describe an achievement" 
                         value={ach} 
@@ -735,84 +848,99 @@ const ResumeGenerator = () => {
 
       case 'projects':
         return (
-          <CollapsibleSection key="projects" title="Projects" icon={<Globe size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-3 lg:mb-4">
+          <CollapsibleSection 
+            key={`projects-${projectsRenderKey}`} 
+            title="Projects" 
+            icon={<Globe size={24} />} 
+            defaultOpen={true}
+          >
+            <div className="flex justify-between items-center mb-3 lg:mb-4">
+              <button onClick={forceGlobalRerender} className="text-blue-600 hover:text-blue-800 text-xs font-medium" title="Refresh if stuck">
+                <RefreshCw size={14} />
+              </button>
               <button onClick={addProject} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
                 <Plus size={14} /> Add Project
               </button>
             </div>
-            {resumeData.projects.map((proj, index) => (
-              <div key={index} className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
-                {resumeData.projects.length > 1 && (
-                  <div className="flex justify-end mb-2">
-                    <button onClick={() => removeProject(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Project">
-                      <Trash2 size={14} />
+            <div ref={projectsSectionRef}>
+              {resumeData.projects.map((proj, index) => (
+                <div 
+                  key={`project-${index}-${proj.name || 'empty'}-${projectsRenderKey}`}
+                  data-project-index={index}
+                  className="border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0 transition-all duration-300" 
+                  style={{ borderColor: 'var(--color-border)' }}
+                >
+                  {resumeData.projects.length > 1 && (
+                    <div className="flex justify-end mb-2">
+                      <button onClick={() => removeProject(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Project">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
+                    <input 
+                      type="text" 
+                      placeholder="Project Name" 
+                      value={proj.name} 
+                      onChange={e => updateProject(index, 'name', e.target.value)} 
+                      className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Technologies Used" 
+                      value={proj.technologies} 
+                      onChange={e => updateProject(index, 'technologies', e.target.value)} 
+                      className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
+                    />
+                    <input 
+                      type="url" 
+                      placeholder="GitHub Repository URL" 
+                      value={proj.github} 
+                      onChange={e => updateProject(index, 'github', e.target.value)} 
+                      className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                    />
+                    <input 
+                      type="url" 
+                      placeholder="Live Site URL" 
+                      value={proj.livesite} 
+                      onChange={e => updateProject(index, 'livesite', e.target.value)} 
+                      className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                    />
+                  </div>
+                  <div className="space-y-2 lg:space-y-3">
+                    <label className="font-medium text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
+                      Description:
+                    </label>
+                    {proj.description.map((desc, descIndex) => (
+                      <div key={`description-${descIndex}`} className="flex items-start gap-2">
+                        <textarea 
+                          placeholder="Describe the project and your contributions" 
+                          value={desc} 
+                          onChange={e => updateProjectDescription(index, descIndex, e.target.value)} 
+                          rows={2} 
+                          className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
+                        />
+                        {proj.description.length > 1 && (
+                          <button 
+                            onClick={() => removeProjectDescription(index, descIndex)} 
+                            className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
+                            title="Remove Description"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => addProjectDescription(index)} 
+                      className="text-blue-600 hover:text-blue-800 text-xs lg:text-sm font-medium"
+                    >
+                      + Add Description Point
                     </button>
                   </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
-                  <input 
-                    type="text" 
-                    placeholder="Project Name" 
-                    value={proj.name} 
-                    onChange={e => updateProject(index, 'name', e.target.value)} 
-                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="Technologies Used" 
-                    value={proj.technologies} 
-                    onChange={e => updateProject(index, 'technologies', e.target.value)} 
-                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
-                  />
-                  <input 
-                    type="url" 
-                    placeholder="GitHub Repository URL" 
-                    value={proj.github} 
-                    onChange={e => updateProject(index, 'github', e.target.value)} 
-                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                  />
-                  <input 
-                    type="url" 
-                    placeholder="Live Site URL" 
-                    value={proj.livesite} 
-                    onChange={e => updateProject(index, 'livesite', e.target.value)} 
-                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                  />
                 </div>
-                <div className="space-y-2 lg:space-y-3">
-                  <label className="font-medium text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
-                    Description:
-                  </label>
-                  {proj.description.map((desc, descIndex) => (
-                    <div key={descIndex} className="flex items-start gap-2">
-                      <textarea 
-                        placeholder="Describe the project and your contributions" 
-                        value={desc} 
-                        onChange={e => updateProjectDescription(index, descIndex, e.target.value)} 
-                        rows={2} 
-                        className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
-                      />
-                      {proj.description.length > 1 && (
-                        <button 
-                          onClick={() => removeProjectDescription(index, descIndex)} 
-                          className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
-                          title="Remove Description"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button 
-                    onClick={() => addProjectDescription(index)} 
-                    className="text-blue-600 hover:text-blue-800 text-xs lg:text-sm font-medium"
-                  >
-                    + Add Description Point
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CollapsibleSection>
         );
 
@@ -869,7 +997,7 @@ const ResumeGenerator = () => {
             </div>
             <div className="space-y-2 lg:space-y-3">
               {resumeData.certifications.map((cert, index) => (
-                <div key={index} className="flex items-start gap-2">
+                <div key={`certification-${index}`} className="flex items-start gap-2">
                   <textarea 
                     placeholder="Certification name, issuing organization, etc." 
                     value={cert} 
@@ -898,7 +1026,7 @@ const ResumeGenerator = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
+    <div key={globalRenderKey} className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
         {/* Mobile-Optimized Layout: Details Section (Upper 2/3) */}
         <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface)' }}>
             {/* Form Container - Mobile: 2/3 height, Desktop: Full height */}
