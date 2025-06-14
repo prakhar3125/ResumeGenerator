@@ -121,6 +121,22 @@ const LandingPage = () => {
           </button>
         </a>
       </div>
+      <div className="mb-12">
+  <div className="max-w-2xl mx-auto">
+    <h3 className="text-center text-lg font-semibold mb-6" style={{ color: 'var(--color-foreground-secondary)' }}>
+      See What You Can Create
+    </h3>
+    <div className="relative group">
+      <img
+        src="img.jpg"
+        alt="Professional resume sample created with ResumeForge"
+        className="w-full rounded-lg shadow-2xl border border-opacity-20 hover:shadow-3xl transition-shadow duration-300"
+        style={{ borderColor: 'var(--color-border)' }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black-20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    </div>
+  </div>
+</div>
       <div className="flex items-center justify-center gap-6 text-sm mb-12" style={{ color: 'var(--color-foreground-secondary)' }}>
         <div className="flex items-center gap-2">
           {/* Assuming you have a Check icon component */}
