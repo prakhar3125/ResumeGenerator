@@ -355,12 +355,12 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
                 />
             </button>
             <div
-                className={`transition-all duration-300 ease-in-out ${
-                    isOpen 
-                        ? 'max-h-screen opacity-100 visible' 
-                        : 'max-h-0 opacity-0 invisible overflow-hidden'
-                }`}
-            >
+  className={`transition-[max-height,opacity] duration-300 ease-in-out ${ // This is the fix
+    isOpen 
+      ? 'max-h-screen opacity-100 visible' 
+      : 'max-h-0 opacity-0 invisible overflow-hidden'
+  }`}
+>
                 <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     {children}
                 </div>
