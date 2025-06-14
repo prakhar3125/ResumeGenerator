@@ -327,6 +327,7 @@ const useDebounce = (callback, delay) => {
 };
 
 // Enhanced Collapsible Section Component with Dark Mode Support
+// Fixed CollapsibleSection Component with Proper Transitions
 const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     
@@ -335,11 +336,14 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
     };
 
     return (
-        <div className="surface rounded-lg mb-4 lg:mb-6 overflow-hidden transition-all duration-300">
+        <div className="surface rounded-lg mb-4 lg:mb-6 overflow-hidden">
             <button
                 onClick={toggleSection}
-                className="w-full flex justify-between items-center p-3 lg:p-4 text-left font-semibold text-base lg:text-lg hover:surface-secondary transition-colors duration-200"
-                style={{ color: 'var(--color-foreground)' }}
+                className="w-full flex justify-between items-center p-3 lg:p-4 text-left font-semibold text-base lg:text-lg hover:surface-secondary"
+                style={{ 
+                    color: 'var(--color-foreground)',
+                    transition: 'background-color var(--transition-fast)'
+                }}
             >
                 <div className="flex items-center gap-2 lg:gap-3">
                     <div className="flex-shrink-0">
@@ -349,18 +353,23 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
                 </div>
                 <ChevronDown
                     size={window.innerWidth < 1024 ? 20 : 24}
-                    className={`transform transition-transform duration-300 flex-shrink-0 ${
-                        isOpen ? 'rotate-180' : ''
-                    }`}
+                    className="flex-shrink-0"
+                    style={{
+                        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform var(--transition-fast)'
+                    }}
                 />
             </button>
+            {/* FIXED: Proper transition handling without conflicting classes */}
             <div
-  className={`transition-[max-height,opacity] duration-300 ease-in-out ${ // This is the fix
-    isOpen 
-      ? 'max-h-screen opacity-100 visible' 
-      : 'max-h-0 opacity-0 invisible overflow-hidden'
-  }`}
->
+                style={{
+                    maxHeight: isOpen ? '2000px' : '0px',
+                    opacity: isOpen ? 1 : 0,
+                    visibility: isOpen ? 'visible' : 'hidden',
+                    overflow: isOpen ? 'visible' : 'hidden',
+                    transition: 'max-height var(--transition-fast) ease-in-out, opacity var(--transition-fast) ease-in-out'
+                }}
+            >
                 <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     {children}
                 </div>
@@ -368,6 +377,7 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
         </div>
     );
 };
+
 
 // Section Order Manager Component with Drag & Drop
 const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen }) => {
@@ -734,6 +744,90 @@ const ResumeGenerator = () => {
         );
 
       case 'projects':
+  return (
+    <CollapsibleSection key="projects" title="Projects" icon={<Globe size={24} />} defaultOpen={true}>
+      <div className="project-section">
+        <div className="flex justify-end mb-3 lg:mb-4">
+          <button onClick={addProject} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+            <Plus size={14} /> Add Project
+          </button>
+        </div>
+        {resumeData.projects.map((proj, index) => (
+          <div key={index} className="project-form-container border-t pt-3 lg:pt-4 mt-3 lg:mt-4 first:border-t-0 first:mt-0" style={{ borderColor: 'var(--color-border)' }}>
+            {resumeData.projects.length > 1 && (
+              <div className="flex justify-end mb-2">
+                <button onClick={() => removeProject(index)} className="text-red-500 hover:text-red-700 p-1 rounded" title="Remove Project">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
+            <div className="layout-grid mb-3 lg:mb-4">
+              <input 
+                type="text" 
+                placeholder="Project Name" 
+                value={proj.name} 
+                onChange={e => updateProject(index, 'name', e.target.value)} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg layout-grid-full focus:outline-none" 
+              />
+              <input 
+                type="text" 
+                placeholder="Technologies Used" 
+                value={proj.technologies} 
+                onChange={e => updateProject(index, 'technologies', e.target.value)} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg layout-grid-full focus:outline-none" 
+              />
+              <input 
+                type="url" 
+                placeholder="GitHub Repository URL" 
+                value={proj.github} 
+                onChange={e => updateProject(index, 'github', e.target.value)} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+              />
+              <input 
+                type="url" 
+                placeholder="Live Site URL" 
+                value={proj.livesite} 
+                onChange={e => updateProject(index, 'livesite', e.target.value)} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+              />
+            </div>
+            <div className="project-description-container">
+              <label className="font-medium text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
+                Description:
+              </label>
+              {proj.description.map((desc, descIndex) => (
+                <div key={descIndex} className="project-description-item">
+                  <textarea 
+                    placeholder="Describe the project and your contributions" 
+                    value={desc} 
+                    onChange={e => updateProjectDescription(index, descIndex, e.target.value)} 
+                    rows={2} 
+                    className="input-field project-description-textarea p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-vertical" 
+                  />
+                  {proj.description.length > 1 && (
+                    <button 
+                      onClick={() => removeProjectDescription(index, descIndex)} 
+                      className="text-red-500 hover:text-red-700 mt-2 p-1 rounded flex-shrink-0"
+                      title="Remove Description"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button 
+                onClick={() => addProjectDescription(index)} 
+                className="text-blue-600 hover:text-blue-800 text-xs lg:text-sm font-medium self-start"
+              >
+                + Add Description Point
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </CollapsibleSection>
+  );
+
         return (
           <CollapsibleSection key="projects" title="Projects" icon={<Globe size={24} />} defaultOpen={true}>
             <div className="flex justify-end mb-3 lg:mb-4">
@@ -897,116 +991,115 @@ const ResumeGenerator = () => {
     }
   };
 
-  return (
+// Fixed Main Layout with Proper Scrolling and Height Management
+return (
     <div className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-        {/* Mobile-Optimized Layout: Details Section (Upper 2/3) */}
-        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface)' }}>
-            {/* Form Container - Mobile: 2/3 height, Desktop: Full height */}
-            <div
-    className={`transition-[max-height,opacity] duration-300 ease-in-out ${
-        isOpen 
-            ? 'max-h-screen opacity-100 visible' 
-            : 'max-h-0 opacity-0 invisible overflow-hidden'
-    }`}
->
-                
-                {/* Compact Header with Dark Mode Toggle and Download */}
-                <div className="flex justify-between items-center mb-4 lg:mb-8">
-                    <h1 className="text-xl lg:text-3xl font-bold truncate pr-2" style={{ color: 'var(--color-foreground)' }}>
-                        LaTeX Resume Generator
-                    </h1>
-                    <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
-                        <DarkModeToggle />
-                        {pdfUrl && (
-                            <a 
-                                href={pdfUrl} 
-                                download="resume.pdf" 
-                                className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium"
-                            >
-                                <Download size={14} /> 
-                                <span className="hidden sm:inline">Download</span>
-                            </a>
-                        )}
+        {/* FIXED: Form Section with Proper Container Management */}
+        <div className="w-full lg:w-1/2 flex flex-col form-section" style={{ backgroundColor: 'var(--color-surface)' }}>
+            {/* FIXED: Scrollable Form Container */}
+            <div className="form-container scrollable-content">
+                <div className="form-content-wrapper">
+                    {/* Compact Header with Dark Mode Toggle and Download */}
+                    <div className="flex justify-between items-center mb-4 lg:mb-8 sticky top-0 z-10 bg-opacity-95 backdrop-blur-sm p-2 -m-2 rounded-lg" 
+                         style={{ backgroundColor: 'var(--color-surface)' }}>
+                        <h1 className="text-xl lg:text-3xl font-bold truncate pr-2" style={{ color: 'var(--color-foreground)' }}>
+                            LaTeX Resume Generator
+                        </h1>
+                        <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+                            <DarkModeToggle />
+                            {pdfUrl && (
+                                <a 
+                                    href={pdfUrl} 
+                                    download="resume.pdf" 
+                                    className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium"
+                                >
+                                    <Download size={14} /> 
+                                    <span className="hidden sm:inline">Download</span>
+                                </a>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* FIXED: Content area with proper spacing */}
+                    <div className="space-y-4 lg:space-y-6 pb-8">
+                        {/* Section Order Manager */}
+                        <SectionOrderManager 
+                            sectionOrder={sectionOrder}
+                            setSectionOrder={setSectionOrder}
+                            isOpen={sectionOrderOpen}
+                            setIsOpen={setSectionOrderOpen}
+                        />
+
+                        {/* Personal Information Section */}
+                        <CollapsibleSection title="Personal Information" icon={<FileText size={24} />} defaultOpen={true}>
+                            <div className="layout-grid">
+                                <input 
+                                    type="text" 
+                                    placeholder="Full Name" 
+                                    value={resumeData.personalInfo.name} 
+                                    onChange={(e) => updatePersonalInfo('name', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="email" 
+                                    placeholder="Email Address" 
+                                    value={resumeData.personalInfo.email} 
+                                    onChange={(e) => updatePersonalInfo('email', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="tel" 
+                                    placeholder="Phone Number" 
+                                    value={resumeData.personalInfo.phone} 
+                                    onChange={(e) => updatePersonalInfo('phone', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="url" 
+                                    placeholder="LinkedIn Profile URL" 
+                                    value={resumeData.personalInfo.linkedin} 
+                                    onChange={(e) => updatePersonalInfo('linkedin', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="url" 
+                                    placeholder="GitHub Profile URL" 
+                                    value={resumeData.personalInfo.github} 
+                                    onChange={(e) => updatePersonalInfo('github', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="url" 
+                                    placeholder="Portfolio Website URL" 
+                                    value={resumeData.personalInfo.portfolio} 
+                                    onChange={(e) => updatePersonalInfo('portfolio', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+                                />
+                                <input 
+                                    type="url" 
+                                    placeholder="LeetCode Profile URL" 
+                                    value={resumeData.personalInfo.leetcode} 
+                                    onChange={(e) => updatePersonalInfo('leetcode', e.target.value)} 
+                                    className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg layout-grid-full focus:outline-none" 
+                                />
+                            </div>
+                        </CollapsibleSection>
+
+                        {/* Render sections in the order specified by sectionOrder */}
+                        {sectionOrder.map(sectionType => renderSectionByType(sectionType))}
                     </div>
                 </div>
-
-                {/* Section Order Manager */}
-                <SectionOrderManager 
-                    sectionOrder={sectionOrder}
-                    setSectionOrder={setSectionOrder}
-                    isOpen={sectionOrderOpen}
-                    setIsOpen={setSectionOrderOpen}
-                />
-
-                {/* Personal Information Section */}
-                <CollapsibleSection title="Personal Information" icon={<FileText size={24} />} defaultOpen={true}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
-                        <input 
-                            type="text" 
-                            placeholder="Full Name" 
-                            value={resumeData.personalInfo.name} 
-                            onChange={(e) => updatePersonalInfo('name', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="email" 
-                            placeholder="Email Address" 
-                            value={resumeData.personalInfo.email} 
-                            onChange={(e) => updatePersonalInfo('email', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="tel" 
-                            placeholder="Phone Number" 
-                            value={resumeData.personalInfo.phone} 
-                            onChange={(e) => updatePersonalInfo('phone', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="url" 
-                            placeholder="LinkedIn Profile URL" 
-                            value={resumeData.personalInfo.linkedin} 
-                            onChange={(e) => updatePersonalInfo('linkedin', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="url" 
-                            placeholder="GitHub Profile URL" 
-                            value={resumeData.personalInfo.github} 
-                            onChange={(e) => updatePersonalInfo('github', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="url" 
-                            placeholder="Portfolio Website URL" 
-                            value={resumeData.personalInfo.portfolio} 
-                            onChange={(e) => updatePersonalInfo('portfolio', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
-                        />
-                        <input 
-                            type="url" 
-                            placeholder="LeetCode Profile URL" 
-                            value={resumeData.personalInfo.leetcode} 
-                            onChange={(e) => updatePersonalInfo('leetcode', e.target.value)} 
-                            className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg md:col-span-2 focus:outline-none" 
-                        />
-                    </div>
-                </CollapsibleSection>
-
-                {/* Render sections in the order specified by sectionOrder */}
-                {sectionOrder.map(sectionType => renderSectionByType(sectionType))}
             </div>
         </div>
 
-        {/* Mobile-Optimized Layout: PDF Preview Section (Lower 1/3) */}
-        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
-            <div className="flex-grow surface rounded-lg lg:rounded-none flex items-center justify-center p-2 lg:p-4 m-2 lg:m-4 lg:mt-4"
+        {/* FIXED: PDF Preview Section with Consistent Height */}
+        <div className="w-full lg:w-1/2 flex flex-col pdf-section" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
+            <div className="pdf-container surface rounded-lg lg:rounded-none flex items-center justify-center p-2 lg:p-4 m-2 lg:m-4 lg:mt-4"
                  style={{ 
-                     height: window.innerWidth < 1024 ? '33.33vh' : 'calc(100vh - 2rem)',
-                     minHeight: window.innerWidth < 1024 ? '33.33vh' : 'auto',
-                     maxHeight: window.innerWidth < 1024 ? '33.33vh' : 'none'
+                     height: 'calc(100vh - 1rem)',
+                     minHeight: '400px',
+                     maxHeight: 'calc(100vh - 1rem)'
                  }}>
-
                 {isCompiling && (
                     <div className="text-center" style={{ color: 'var(--color-foreground-secondary)' }}>
                         <Loader size={window.innerWidth < 1024 ? 32 : 48} className="animate-spin mb-2 lg:mb-4 mx-auto" />
@@ -1044,7 +1137,8 @@ const ResumeGenerator = () => {
             </div>
         </div>
     </div>
-  );
+);
+
 };
 
 // Main App Component with Dark Mode Provider
