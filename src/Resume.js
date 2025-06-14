@@ -1,3 +1,5 @@
+/* Resume.js */
+
 import React, { useState, useEffect, useCallback, createContext,useContext } from 'react';
 import { Mail, Phone, Linkedin, Github, Globe, Code, FileText, Plus, Trash2, Download, Loader, AlertTriangle, ChevronDown, RefreshCw, Briefcase, Wrench, Award, Moon, Sun, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -353,12 +355,12 @@ const CollapsibleSection = ({ title, icon, children, defaultOpen = true }) => {
                 />
             </button>
             <div
-                className={`transition-[max-height,opacity] duration-300 ease-in-out ${
-                    isOpen 
-                        ? 'max-h-screen opacity-100 visible' 
-                        : 'max-h-0 opacity-0 invisible overflow-hidden'
-                }`}
-            >
+  className={`transition-[max-height,opacity] duration-300 ease-in-out ${ // This is the fix
+    isOpen 
+      ? 'max-h-screen opacity-100 visible' 
+      : 'max-h-0 opacity-0 invisible overflow-hidden'
+  }`}
+>
                 <div className="p-3 lg:p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     {children}
                 </div>
@@ -897,10 +899,16 @@ const ResumeGenerator = () => {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-        {/* Details Section (Form Inputs) */}
-        <div className="w-full lg:w-1/2 flex flex-col h-screen">
-            {/* Form Container */}
-            <div className="flex-grow overflow-y-auto p-3 lg:p-6">
+        {/* Mobile-Optimized Layout: Details Section (Upper 2/3) */}
+        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface)' }}>
+            {/* Form Container - Mobile: 2/3 height, Desktop: Full height */}
+            <div
+    className={`transition-[max-height,opacity] duration-300 ease-in-out ${
+        isOpen 
+            ? 'max-h-screen opacity-100 visible' 
+            : 'max-h-0 opacity-0 invisible overflow-hidden'
+    }`}
+>
                 
                 {/* Compact Header with Dark Mode Toggle and Download */}
                 <div className="flex justify-between items-center mb-4 lg:mb-8">
@@ -990,9 +998,14 @@ const ResumeGenerator = () => {
             </div>
         </div>
 
-        {/* PDF Preview Section */}
-        <div className="w-full lg:w-1/2 flex flex-col h-screen p-4" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
-            <div className="flex-grow surface rounded-lg flex items-center justify-center">
+        {/* Mobile-Optimized Layout: PDF Preview Section (Lower 1/3) */}
+        <div className="w-full lg:w-1/2 flex flex-col" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
+            <div className="flex-grow surface rounded-lg lg:rounded-none flex items-center justify-center p-2 lg:p-4 m-2 lg:m-4 lg:mt-4"
+                 style={{ 
+                     height: window.innerWidth < 1024 ? '33.33vh' : 'calc(100vh - 2rem)',
+                     minHeight: window.innerWidth < 1024 ? '33.33vh' : 'auto',
+                     maxHeight: window.innerWidth < 1024 ? '33.33vh' : 'none'
+                 }}>
 
                 {isCompiling && (
                     <div className="text-center" style={{ color: 'var(--color-foreground-secondary)' }}>
