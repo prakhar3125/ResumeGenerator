@@ -80,18 +80,38 @@ export const DarkModeToggle = () => {
 
 const escapeLatex = (str) => {
   if (typeof str !== 'string') return '';
-  return str
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/&/g, '\\&')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/{/g, '\\{')
-    .replace(/}/g, '\\}')
-    .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+  
+  // First convert *word* to \textbf{word}
+  let result = str.replace(/\*([^*]+)\*/g, '\\textbf{$1}');
+  
+  // Then escape special characters, but preserve \textbf{} commands
+  // Split on \textbf{...} to process separately
+  const parts = result.split(/(\\textbf\{[^}]*\})/);
+  
+  result = parts.map((part, index) => {
+    // Don't escape \textbf{} commands (odd indices)
+    if (index % 2 === 1) {
+      return part;
+    }
+    
+    // Escape special characters in regular text
+    return part
+      .replace(/\\/g, '\\textbackslash{}')
+      .replace(/&/g, '\\&')
+      .replace(/%/g, '\\%')
+      .replace(/\$/g, '\\$')
+      .replace(/#/g, '\\#')
+      .replace(/_/g, '\\_')
+      .replace(/{/g, '\\{')
+      .replace(/}/g, '\\}')
+      .replace(/~/g, '\\textasciitilde{}')
+      .replace(/\^/g, '\\textasciicircum{}');
+  }).join('');
+  
+  return result;
 };
+
+
 
 const generateHeader = (personalInfo) => {
   const { name, email, phone, linkedin, github, portfolio, leetcode } = personalInfo;
@@ -1018,6 +1038,11 @@ return (
                                 </a>
                             )}
                         </div>
+                    </div>
+                    <div className="p-3 lg:p-4 rounded-lg mb-4 lg:mb-6" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-primary)' }}>
+                        <p className="text-sm lg:text-base">
+                            💡 <strong>Tip:</strong> You can now make text bold by enclosing it in asterisks. For example, writing `*your text here*` will render as <strong>your text here</strong>.
+                        </p>
                     </div>
 
                     {/* FIXED: Content area with proper spacing */}

@@ -11,18 +11,37 @@
 
 const escapeLatex = (str) => {
   if (typeof str !== 'string') return '';
-  return str
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/&/g, '\\&')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/{/g, '\\{')
-    .replace(/}/g, '\\}')
-    .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+  
+  // First convert *word* to \textbf{word}
+  let result = str.replace(/\*([^*]+)\*/g, '\\textbf{$1}');
+  
+  // Then escape special characters, but preserve \textbf{} commands
+  // Split on \textbf{...} to process separately
+  const parts = result.split(/(\\textbf\{[^}]*\})/);
+  
+  result = parts.map((part, index) => {
+    // Don't escape \textbf{} commands (odd indices)
+    if (index % 2 === 1) {
+      return part;
+    }
+    
+    // Escape special characters in regular text
+    return part
+      .replace(/\\/g, '\\textbackslash{}')
+      .replace(/&/g, '\\&')
+      .replace(/%/g, '\\%')
+      .replace(/\$/g, '\\$')
+      .replace(/#/g, '\\#')
+      .replace(/_/g, '\\_')
+      .replace(/{/g, '\\{')
+      .replace(/}/g, '\\}')
+      .replace(/~/g, '\\textasciitilde{}')
+      .replace(/\^/g, '\\textasciicircum{}');
+  }).join('');
+  
+  return result;
 };
+
 
 const generateHeader = (personalInfo) => {
   const { name, email, phone, linkedin, github, portfolio, leetcode } = personalInfo;
