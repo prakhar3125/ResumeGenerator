@@ -964,9 +964,16 @@ setPdfUrl(newPdfUrl);
                     {/* UPDATED: Header with Clear Data button */}
                     <div className="flex justify-between items-center mb-4 lg:mb-8 sticky top-0 z-10 bg-opacity-95 backdrop-blur-sm p-2 -m-2 rounded-lg" 
                          style={{ backgroundColor: 'var(--color-surface)' }}>
-                        <h1 className="text-xl lg:text-3xl font-bold truncate pr-2" style={{ color: 'var(--color-foreground)' }}>
-                            ResumeForge - By Prakhar Sinha
-                        </h1>
+                        <div className="truncate pr-2">
+  <h1 className="text-xl lg:text-3xl font-bold" style={{ color: 'var(--color-foreground)' }}>
+    ResumeForge
+  </h1>
+  <div className="text-xs lg:text-sm" style={{ color: 'var(--color-foreground-secondary)' }}>
+    <span className="opacity-60">Created by </span>
+    <span className="font-medium">Prakhar Sinha</span>
+  </div>
+</div>
+
                         <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
                             <DarkModeToggle />
                             {pdfUrl && (
