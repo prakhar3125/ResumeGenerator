@@ -131,21 +131,38 @@ const escapeLatex = (str) => {
 const generateHeader = (personalInfo) => {
   const { name, email, phone, linkedin, github, portfolio, leetcode } = personalInfo;
   
-  const contactLinks = [
-    email ? `\\faIcon{envelope} \\href{mailto:${email}}{\\color{black}${escapeLatex(email)}}` : '',
-    phone ? `\\faIcon{phone} \\href{tel:${phone.replace(/[^\d+]/g, '')}}{\\color{black}${escapeLatex(phone)}}` : '',
-    linkedin ? `\\faIcon{linkedin} \\href{${linkedin}}{\\color{black}LinkedIn}` : '',
-    github ? `\\faIcon{github} \\href{${github}}{\\color{black}GitHub}` : '',
-    portfolio ? `\\faIcon{code} \\href{${portfolio}}{\\color{black}Portfolio}` : '',
-    leetcode ? `\\faIcon{code-branch} \\href{${leetcode}}{\\color{black}LeetCode}` : ''
-  ].filter(link => link).join(' \\hspace{5px}\n');
+  const contactLinks = [];
+  
+  if (email) {
+    contactLinks.push(`\\faIcon{envelope} \\href{mailto:${email}}{\\color{black}${escapeLatex(email)}}`);
+  }
+  if (phone) {
+    contactLinks.push(`\\faIcon{phone} \\href{tel:${phone.replace(/[^\d+]/g, '')}}{\\color{black}${escapeLatex(phone)}}`);
+  }
+  if (linkedin) {
+    contactLinks.push(`\\faIcon{linkedin} \\href{${ensureHttpProtocol(linkedin)}}{\\color{black}LinkedIn}`);
+  }
+  if (github) {
+    contactLinks.push(`\\faIcon{github} \\href{${ensureHttpProtocol(github)}}{\\color{black}GitHub}`);
+  }
+  if (portfolio) {
+    contactLinks.push(`\\faIcon{code} \\href{${ensureHttpProtocol(portfolio)}}{\\color{black}Portfolio}`);
+  }
+  if (leetcode) {
+    contactLinks.push(`\\faIcon{code-branch} \\href{${ensureHttpProtocol(leetcode)}}{\\color{black}LeetCode}`);
+  }
+
+  const contactSection = contactLinks.join(' \\hspace{3mm} ');
 
   return `\\begin{center}
     \\textbf{\\Huge \\scshape ${escapeLatex(name) || 'Your Name'}} \\\\ \\vspace{8pt}
-    \\small
-    ${contactLinks}
-\\end{center}`;
+    \\small 
+    ${contactSection}
+\\end{center}
+
+\\vspace{-8pt}`;
 };
+
 
 const generateEducationSection = (education) => {
     if (!education || !education.some(e => e && e.institution)) return '';
@@ -181,27 +198,40 @@ const generateExperienceSection = (experience) => {
 };
 
 const generateProjectsSection = (projects) => {
-    if (!projects || !projects.some(p => p && p.name)) return '';
-    const entries = projects.filter(p => p.name).map(proj => {
-        const descriptions = proj.description.filter(d => d.trim() !== '');
-        const descriptionList = descriptions.length > 0 ? `\\resumeItemListStart
-        ${descriptions.map(desc => `\\resumeItem{${escapeLatex(desc)}}`).join('\n')}
-        \\resumeItemListEnd` : '';
-        const links = [
-            proj.github ? `\\href{${proj.github}}{\\textcolor{blue}{(GitHub)}}` : '',
-            proj.livesite ? `\\href{${proj.livesite}}{\\textcolor{blue}{(Live Site)}}` : ''
-        ].filter(Boolean).join(' ');
-        
-        return `\\resumeProject
-        {${escapeLatex(proj.name)}}
-        {${escapeLatex(proj.technologies)} ${links}}{}{}
+  if (!projects || !Array.isArray(projects) || !projects.some(p => p && p.name)) return '';
+  
+  const projectEntries = projects
+    .filter(proj => proj && proj.name && proj.name.trim() !== '')
+    .map(proj => {
+      const descriptions = (proj.description || []).filter(desc => desc && typeof desc === 'string' && desc.trim() !== '');
+      
+      const links = [];
+      if (proj.github && proj.github.trim() !== '') {
+        links.push(`\\href{${ensureHttpProtocol(proj.github)}}{\\textcolor{blue}{(GitHub)}}`);
+      }
+      if (proj.livesite && proj.livesite.trim() !== '') {
+        links.push(`\\href{${ensureHttpProtocol(proj.livesite)}}{\\textcolor{blue}{(Live Site)}}`);
+      }
+      const linkString = links.join(' ');
+      
+      const techWithLinks = proj.technologies ? 
+        `${escapeLatex(proj.technologies)}${linkString ? ' ' + linkString : ''}` : 
+        linkString;
+      
+      const descriptionList = descriptions.length > 0 ? 
+        `\\resumeItemListStart\n${descriptions.map(desc => `\\resumeItem{${escapeLatex(desc)}}`).join('\n')}\n\\resumeItemListEnd` : '';
+      
+      return `\\resumeProject
+        {${escapeLatex(proj.name || '')}}{${techWithLinks}}{}{}
         ${descriptionList}`;
     }).join('\n');
-    return `\\section{Projects}
+
+  return `\\section{Projects}
     \\resumeSubHeadingListStart
-    ${entries}
+    ${projectEntries}
     \\resumeSubHeadingListEnd`;
 };
+
 
 const generateSkillsSection = (skills) => {
     const skillEntries = Object.entries(skills)
@@ -244,21 +274,25 @@ const getDocumentPreamble = () => {
 \\usepackage[usenames,dvipsnames]{color}
 \\usepackage{verbatim}
 \\usepackage{enumitem}
-\\usepackage[hidelinks]{hyperref}
 \\usepackage{fancyhdr}
 \\usepackage[english]{babel}
 \\usepackage{tabularx}
 \\usepackage{fontawesome5}
-\\usepackage{amsmath}
 \\usepackage{xcolor}
 
-\\hypersetup{
+% Single hyperref package with proper configuration
+\\usepackage[
     colorlinks=true,
     linkcolor=black,
     citecolor=black,
     filecolor=black,
-    urlcolor=blue
-}
+    urlcolor=blue,
+    pdfborder={0 0 0},
+    unicode=true,
+    breaklinks=true
+]{hyperref}
+
+\\input{glyphtounicode}
 
 \\pagestyle{fancy}
 \\fancyhf{}
@@ -282,7 +316,12 @@ const getDocumentPreamble = () => {
 
 \\pdfgentounicode=1
 
-\\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
+% Custom commands
+\\newcommand{\\resumeItem}[1]{
+  \\item\\small{
+    {#1 \\vspace{-2pt}}
+  }
+}
 
 \\newcommand{\\resumeSubheading}[4]{
   \\vspace{-2pt}\\item
@@ -293,13 +332,15 @@ const getDocumentPreamble = () => {
 }
 
 \\newcommand{\\resumeProject}[4]{
-    \\vspace{0.5mm}\\item
+  \\vspace{0.5mm}\\item
     \\begin{tabular*}{0.98\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
-      \\textbf{#1} & \\textit{\\footnotesize{#3}} \\\\
-      \\footnotesize{\\textit{#2}} & \\footnotesize{#4}
+        \\textbf{#1} & \\textit{\\footnotesize{#3}} \\\\
+        \\footnotesize{\\textit{#2}} & \\footnotesize{#4}
     \\end{tabular*}
     \\vspace{-4.4mm}
 }
+
+\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
 
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 
@@ -307,8 +348,20 @@ const getDocumentPreamble = () => {
 \\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
 \\newcommand{\\resumeItemListStart}{\\begin{itemize}}
 \\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-8pt}}
-`;
+
+\\addtolength{\\topmargin}{-12pt}
+\\addtolength{\\textheight}{24pt}`;
 };
+
+const ensureHttpProtocol = (url) => {
+  if (!url || typeof url !== 'string') return url;
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+    return `https://${trimmedUrl}`;
+  }
+  return trimmedUrl;
+};
+
 
 const generateFullLatex = (resumeData, sectionOrder) => {
     const preamble = getDocumentPreamble();
