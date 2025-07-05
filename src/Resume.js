@@ -249,10 +249,17 @@ const generateSkillsSection = (skills) => {
 };
 
 const generateCertificationsSection = (certifications) => {
-    const validCerts = certifications.filter(c => c && c.trim() !== '');
+    const validCerts = certifications.filter(c => c && c.name && c.name.trim() !== '');
     if (validCerts.length === 0) return '';
     
-    const certEntries = validCerts.map(cert => `\\resumeItem{${escapeLatex(cert)}}`).join('\\vspace{4pt}\n');
+    const certEntries = validCerts.map(cert => {
+        const certName = escapeLatex(cert.name);
+        const certLink = cert.link && cert.link.trim() !== '' ? 
+            `\\href{${ensureHttpProtocol(cert.link)}}{\\textcolor{blue}{(Link)}}` : '';
+        
+        const certText = certLink ? `${certName} ${certLink}` : certName;
+        return `\\resumeItem{${certText}}`;
+    }).join('\\vspace{4pt}\n');
 
     return `\\vspace{-12pt}
     \\section{Certifications \\& Achievements}
@@ -264,6 +271,7 @@ const generateCertificationsSection = (certifications) => {
         }
     \\end{itemize}`;
 };
+
 
 const getDocumentPreamble = () => {
   return `\\documentclass[letterpaper,11pt]{article}
@@ -567,14 +575,16 @@ const SectionOrderManager = ({ sectionOrder, setSectionOrder, isOpen, setIsOpen 
 // The core component for the Resume Generator with localStorage persistence
 const ResumeGenerator = () => {
   // UPDATED: Using useLocalStorage for form data persistence
-  const [resumeData, setResumeData] = useLocalStorage('resumeData', {
-    personalInfo: { name: '', email: '', phone: '', linkedin: '', github: '', portfolio: '', leetcode: '' },
-    education: [{ institution: '', duration: '', degree: '', cgpa: '', coursework: '' }],
-    experience: [{ company: '', duration: '', position: '', location: '', achievements: [''] }],
-    projects: [{ name: '', technologies: '', github: '', livesite: '', description: [''] }],
-    skills: { expertise: '', languages: '', frameworks: '', tools: '', professional: '' },
-    certifications: ['']
-  });
+  // UPDATED: Change certifications from array of strings to array of objects
+const [resumeData, setResumeData] = useLocalStorage('resumeData', {
+  personalInfo: { name: '', email: '', phone: '', linkedin: '', github: '', portfolio: '', leetcode: '' },
+  education: [{ institution: '', duration: '', degree: '', cgpa: '', coursework: '' }],
+  experience: [{ company: '', duration: '', position: '', location: '', achievements: [''] }],
+  projects: [{ name: '', technologies: '', github: '', livesite: '', description: [''] }],
+  skills: { expertise: '', languages: '', frameworks: '', tools: '', professional: '' },
+  certifications: [{ name: '', link: '' }] // UPDATED: Changed from array of strings to array of objects
+});
+
 
   // UPDATED: Using useLocalStorage for section order persistence
   const [sectionOrder, setSectionOrder] = useLocalStorage('sectionOrder', [
@@ -594,27 +604,28 @@ const ResumeGenerator = () => {
 
   // NEW: Function to clear all cached form data
   const clearFormData = () => {
-    localStorage.removeItem('resumeData');
-    localStorage.removeItem('sectionOrder');
-    
-    // Reset to initial values
-    setResumeData({
-      personalInfo: { name: '', email: '', phone: '', linkedin: '', github: '', portfolio: '', leetcode: '' },
-      education: [{ institution: '', duration: '', degree: '', cgpa: '', coursework: '' }],
-      experience: [{ company: '', duration: '', position: '', location: '', achievements: [''] }],
-      projects: [{ name: '', technologies: '', github: '', livesite: '', description: [''] }],
-      skills: { expertise: '', languages: '', frameworks: '', tools: '', professional: '' },
-      certifications: ['']
-    });
-    
-    setSectionOrder([
-      'education',
-      'projects', 
-      'experience',
-      'skills',
-      'certifications'
-    ]);
-  };
+  localStorage.removeItem('resumeData');
+  localStorage.removeItem('sectionOrder');
+  
+  // Reset to initial values
+  setResumeData({
+    personalInfo: { name: '', email: '', phone: '', linkedin: '', github: '', portfolio: '', leetcode: '' },
+    education: [{ institution: '', duration: '', degree: '', cgpa: '', coursework: '' }],
+    experience: [{ company: '', duration: '', position: '', location: '', achievements: [''] }],
+    projects: [{ name: '', technologies: '', github: '', livesite: '', description: [''] }],
+    skills: { expertise: '', languages: '', frameworks: '', tools: '', professional: '' },
+    certifications: [{ name: '', link: '' }] // UPDATED: Changed structure
+  });
+  
+  setSectionOrder([
+    'education',
+    'projects', 
+    'experience',
+    'skills',
+    'certifications'
+  ]);
+};
+
   
   // Enhanced compilation function with dynamic section ordering
   const handleCompile = useCallback(async (isManual = false) => {
@@ -695,10 +706,14 @@ setPdfUrl(newPdfUrl);
   const removeProjectDescription = (projIndex, descIndex) => setResumeData(p => ({ ...p, projects: p.projects.map((proj, i) => i === projIndex ? { ...proj, description: proj.description.filter((_, j) => j !== descIndex) } : proj)}));
   const updateProjectDescription = (projIndex, descIndex, value) => setResumeData(p => ({ ...p, projects: p.projects.map((proj, i) => i === projIndex ? { ...proj, description: proj.description.map((d, j) => j === descIndex ? value : d)} : proj)}));
   const updateSkills = (field, value) => setResumeData(p => ({...p, skills: { ...p.skills, [field]: value } }));
-  const addCertification = () => setResumeData(p => ({ ...p, certifications: [...p.certifications, ''] }));
-  const removeCertification = index => setResumeData(p => ({ ...p, certifications: p.certifications.filter((_, i) => i !== index) }));
-  const updateCertification = (index, value) => setResumeData(p => ({...p, certifications: p.certifications.map((c, i) => i === index ? value : c)}));
-  
+ // UPDATED: Modified certification functions to handle objects
+const addCertification = () => setResumeData(p => ({ ...p, certifications: [...p.certifications, { name: '', link: '' }] }));
+const removeCertification = index => setResumeData(p => ({ ...p, certifications: p.certifications.filter((_, i) => i !== index) }));
+const updateCertification = (index, field, value) => setResumeData(p => ({
+  ...p, 
+  certifications: p.certifications.map((c, i) => i === index ? { ...c, [field]: value } : c)
+}));
+
   // Generate sections dynamically based on section order
   const renderSectionByType = (sectionType) => {
     switch(sectionType) {
@@ -970,7 +985,49 @@ setPdfUrl(newPdfUrl);
           </CollapsibleSection>
         );
 
-      case 'certifications':
+case 'certifications':
+  return (
+    <CollapsibleSection key="certifications" title="Certifications & Achievements" icon={<Award size={24} />} defaultOpen={true}>
+      <div className="flex justify-end mb-3 lg:mb-4">
+        <button onClick={addCertification} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
+          <Plus size={14} /> Add Certification
+        </button>
+      </div>
+      <div className="space-y-3 lg:space-y-4">
+        {resumeData.certifications.map((cert, index) => (
+          <div key={index} className="border-t pt-3 lg:pt-4 first:border-t-0 first:pt-0" style={{ borderColor: 'var(--color-border)' }}>
+            {resumeData.certifications.length > 1 && (
+              <div className="flex justify-end mb-2">
+                <button 
+                  onClick={() => removeCertification(index)} 
+                  className="text-red-500 hover:text-red-700 p-1 rounded"
+                  title="Remove Certification"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
+              <textarea 
+                placeholder="Certification name, issuing organization, etc." 
+                value={cert.name} 
+                onChange={(e) => updateCertification(index, 'name', e.target.value)} 
+                rows={2} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
+              />
+              <input 
+                type="url" 
+                placeholder="Certification Link (optional)" 
+                value={cert.link} 
+                onChange={(e) => updateCertification(index, 'link', e.target.value)} 
+                className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none" 
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </CollapsibleSection>
+  );
         return (
           <CollapsibleSection key="certifications" title="Certifications & Achievements" icon={<Award size={24} />} defaultOpen={true}>
             <div className="flex justify-end mb-3 lg:mb-4">
