@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ResumeGenerator from './Resume';
-
+import { Analytics } from "@vercel/analytics/react"
 import LandingPage from './LandingPage';
 import { DarkModeProvider } from './Resume'; // Import DarkModeProvider from Resume.js
 
@@ -21,6 +21,9 @@ const App = () => {
             <Route path="*" element={<Navigate replace to="/" />} />
           </Routes>
         </div>
+        
+        {/* Add Analytics component here */}
+        <Analytics />
       </Router>
     </DarkModeProvider>
   );
