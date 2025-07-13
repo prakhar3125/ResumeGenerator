@@ -160,7 +160,7 @@ const generateHeader = (personalInfo) => {
     ${contactSection}
 \\end{center}
 
-\\vspace{-8pt}`;
+\\vspace{-13pt}`;
 };
 
 
@@ -168,11 +168,14 @@ const generateEducationSection = (education) => {
     if (!education || !education.some(e => e && e.institution)) return '';
     const entries = education.filter(e => e.institution).map(edu => {
         const coursework = edu.coursework ? `\\resumeItemListStart\\item{\\textit{Relevant Coursework:} ${escapeLatex(edu.coursework)}}\\resumeItemListEnd` : '';
-        return `\\resumeSubheading
-      {${escapeLatex(edu.institution)}}{${escapeLatex(edu.duration)}}
-      {${escapeLatex(edu.degree)}}{${edu.cgpa ? `\\textbf{CGPA: ${escapeLatex(edu.cgpa)}}` : ''}}
-      ${coursework}`;
-    }).join('\\vspace{-7pt}\n');
+const finalSpace = edu.coursework ? '' : '\\vspace{-4pt}'; // Only add space if no coursework
+
+return `\\resumeSubheading
+  {${escapeLatex(edu.institution)}}{${escapeLatex(edu.duration)}}
+  {${escapeLatex(edu.degree)}}{${edu.cgpa ? `\\textbf{CGPA: ${escapeLatex(edu.cgpa)}}` : ''}}
+  ${coursework}
+  ${finalSpace}`;
+    }).join('\n');
     return `\\section{Education}
     \\resumeSubHeadingListStart
     ${entries}
@@ -191,7 +194,8 @@ const generateExperienceSection = (experience) => {
       {${escapeLatex(exp.position)}}{${escapeLatex(exp.location)}}
       ${achievementsList}`;
     }).join('');
-    return `\\section{Experience}
+    return `\\vspace{-10pt}
+    \\section{Experience}
     \\resumeSubHeadingListStart
     ${entries}
     \\resumeSubHeadingListEnd`;
@@ -226,7 +230,8 @@ const generateProjectsSection = (projects) => {
         ${descriptionList}`;
     }).join('\n');
 
-  return `\\section{Projects}
+  return `\\vspace{-10pt}
+  \\section{Projects}
     \\resumeSubHeadingListStart
     ${projectEntries}
     \\resumeSubHeadingListEnd`;
@@ -240,7 +245,8 @@ const generateSkillsSection = (skills) => {
 
     if (skillEntries.length === 0) return '';
     
-    return `\\section{Skills}
+    return `\\vspace{-10pt}
+    \\section{Skills}
     \\begin{itemize}[leftmargin=0.15in, label={}]
         \\small{\\item{
             ${skillEntries.join(' \\\\\n\\vspace{3pt}\n')}
@@ -261,7 +267,7 @@ const generateCertificationsSection = (certifications) => {
         return `\\resumeItem{${certText}}`;
     }).join('\\vspace{4pt}\n');
 
-    return `\\vspace{-12pt}
+    return `\\vspace{-10pt}
     \\section{Certifications \\& Achievements}
     \\begin{itemize}[leftmargin=0.15in, label={}]
         \\item{
@@ -387,14 +393,12 @@ const generateFullLatex = (resumeData, sectionOrder) => {
         .filter(sectionId => sectionGenerators[sectionId] && resumeData[sectionId])
         .map(sectionId => sectionGenerators[sectionId]())
         .filter(Boolean)
-        .join('\n\\vspace{-8pt}\n');
+        .join('\n');
 
     const documentBody = `
-\\addtolength{\\topmargin}{-12pt}
-\\addtolength{\\textheight}{24pt}
+
 \\begin{document}
 ${header}
-\\vspace{-8pt}
 ${sections}
 \\end{document}
     `;
@@ -1028,37 +1032,7 @@ case 'certifications':
       </div>
     </CollapsibleSection>
   );
-        return (
-          <CollapsibleSection key="certifications" title="Certifications & Achievements" icon={<Award size={24} />} defaultOpen={true}>
-            <div className="flex justify-end mb-3 lg:mb-4">
-              <button onClick={addCertification} className="btn-primary flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 rounded-lg text-xs lg:text-sm font-medium">
-                <Plus size={14} /> Add Certification
-              </button>
-            </div>
-            <div className="space-y-2 lg:space-y-3">
-              {resumeData.certifications.map((cert, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  <textarea 
-                    placeholder="Certification name, issuing organization, etc." 
-                    value={cert} 
-                    onChange={(e) => updateCertification(index, e.target.value)} 
-                    rows={2} 
-                    className="input-field flex-1 p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none resize-none" 
-                  />
-                  {resumeData.certifications.length > 1 && (
-                    <button 
-                      onClick={() => removeCertification(index)} 
-                      className="text-red-500 hover:text-red-700 mt-2 p-1 rounded"
-                      title="Remove Certification"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CollapsibleSection>
-        );
+      
 
       default:
         return null;
