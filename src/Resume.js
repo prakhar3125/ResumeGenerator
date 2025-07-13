@@ -172,7 +172,7 @@ const finalSpace = edu.coursework ? '' : '\\vspace{-4pt}'; // Only add space if 
 
 return `\\resumeSubheading
   {${escapeLatex(edu.institution)}}{${escapeLatex(edu.duration)}}
-  {${escapeLatex(edu.degree)}}{${edu.cgpa ? `\\textbf{CGPA: ${escapeLatex(edu.cgpa)}}` : ''}}
+  {${escapeLatex(edu.degree)}}{${edu.cgpa ? `\\textbf{${escapeLatex(edu.cgpa)}}` : ''}}
   ${coursework}
   ${finalSpace}`;
     }).join('\n');
@@ -762,7 +762,7 @@ const updateCertification = (index, field, value) => setResumeData(p => ({
                   />
                   <input 
                     type="text" 
-                    placeholder="CGPA/GPA" 
+                    placeholder="Grade (CGPA or %)" 
                     value={edu.cgpa} 
                     onChange={(e) => updateEducation(index, 'cgpa', e.target.value)} 
                     className="input-field p-2 lg:p-3 text-sm lg:text-base rounded-lg focus:outline-none"
